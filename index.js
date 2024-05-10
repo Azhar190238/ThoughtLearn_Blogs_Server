@@ -32,6 +32,7 @@ async function run() {
   try {
 
     const blogsCollection = client.db('BlogsDB').collection('AllBlogs');
+    const subscriberCollection = client.db('BlogsDB').collection('Subscriber');
 
 
 
@@ -48,6 +49,19 @@ async function run() {
                 const newBlogs = req.body;
                 console.log(newBlogs);
                 const result= await blogsCollection.insertOne(newBlogs);
+                res.send(result);
+          
+            })
+
+
+            // subscriber data api
+
+               // data inserted from addBlogs
+
+               app.post('/subscriber', async(req,res)=>{
+                const newSub = req.body;
+                console.log(newSub);
+                const result= await subscriberCollection.insertOne(newSub);
                 res.send(result);
           
             })

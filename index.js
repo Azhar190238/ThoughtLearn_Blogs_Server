@@ -17,7 +17,7 @@ app.use(express.json());
 
 
 
-const uri = "mongodb+srv://BlogDB:4oZ9IAlihYyXz7OA@cluster0.ieebpm5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ieebpm5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -30,8 +30,29 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+
+    const blogsCollection = client.db('BlogsDB').collection('AllBlogs');
+
+
+
+            // service related get all data operation api
+
+            app.get('/addBlogs', async (req, res) => {
+                const cursor = blogsCollection.find();
+                const result = await cursor.toArray();
+                res.send(result);
+            })
+    // data inserted from addBlogs
+
+            app.post('/addBlogs', async(req,res)=>{
+                const newBlogs = req.body;
+                console.log(newBlogs);
+                const result= await blogsCollection.insertOne(newBlogs);
+                res.send(result);
+          
+            })
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");

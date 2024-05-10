@@ -55,15 +55,8 @@ async function run() {
 
 
             // subscriber data api
-            app.get('/subscriber', async (req, res) => {
-                const cursor = subscriberCollection.find();
-                const result = await cursor.toArray();
-                res.send(result);
-            })
 
-               // data inserted from addBlogs
-
-
+               // data inserted from Subscriber-Blogs
                app.post('/subscriber', async(req,res)=>{
                 const newSub = req.body;
                 console.log(newSub);

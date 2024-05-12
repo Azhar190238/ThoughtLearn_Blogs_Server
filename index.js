@@ -21,109 +21,120 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
 });
 
 async function run() {
-  try {
+    try {
 
-    const blogsCollection = client.db('BlogsDB').collection('AllBlogs');
-    const subscriberCollection = client.db('BlogsDB').collection('Subscriber');
-    const wishlistCollection = client.db('BlogsDB').collection('Wishlist')
+        const blogsCollection = client.db('BlogsDB').collection('AllBlogs');
+        const subscriberCollection = client.db('BlogsDB').collection('Subscriber');
+        const wishlistCollection = client.db('BlogsDB').collection('Wishlist')
 
 
 
-            // service related get all data operation api
+        // service related get all data operation api
 
-            app.get('/addBlogs', async (req, res) => {
-                const cursor = blogsCollection.find();
-                const result = await cursor.toArray();
-                res.send(result);
-            })
-           // specific data read for details
+        app.get('/addBlogs', async (req, res) => {
+            const cursor = blogsCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+        // specific data read for details
 
-            app.get('/addBlogs/:id' , async(req,res) => {
-               const id =req.params.id;
-               const query = { _id: new ObjectId(id)}
-               const result = await blogsCollection.findOne(query);
-               res.send(result);
-            })
+        app.get('/addBlogs/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await blogsCollection.findOne(query);
+            res.send(result);
+        })
 
-    // updated or put operation
+        // updated or put operation
 
-    app.put('/addBlogs/:id', async(req, res) =>{
-        const id = req.params.id;
-        const filter = { _id: new ObjectId(id)}
-        const options = {upsert:true};
-        const updatedBlog = req.body;
-        const blog ={
-            $set:{
-                title: updatedBlog.title,
-                short_description: updatedBlog.short_description,
-                long_description: updatedBlog.long_description,
-                category: updatedBlog.category,
-                photo: updatedBlog.photo
-               
+        app.put('/addBlogs/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updatedBlog = req.body;
+            const blog = {
+                $set: {
+                    title: updatedBlog.title,
+                    short_description: updatedBlog.short_description,
+                    long_description: updatedBlog.long_description,
+                    category: updatedBlog.category,
+                    photo: updatedBlog.photo,
+                    userPhoto: updatedBlog.userPhoto
+
+                }
             }
-        }
-        const result = await blogsCollection.updateOne(filter,blog,options);
-        res.send(result);
-    })
-
-            
-
-     
-    // data inserted from addBlogs
-
-            app.post('/addBlogs', async(req,res)=>{
-                const newBlogs = req.body;
-                console.log(newBlogs);
-                const result= await blogsCollection.insertOne(newBlogs);
-                res.send(result);
-          
-            })
+            const result = await blogsCollection.updateOne(filter, blog, options);
+            res.send(result);
+        })
 
 
-            // subscriber data api
-
-               // data inserted from Subscriber-Blogs
-               app.post('/subscriber', async(req,res)=>{
-                const newSub = req.body;
-                console.log(newSub);
-                const result= await subscriberCollection.insertOne(newSub);
-                res.send(result);
-          
-            })
-   // data inserted for wishlist
-            app.post('/wishlist', async(req,res)=>{
-                const newSub = req.body;
-                console.log(newSub);
-                const result= await subscriberCollection.insertOne(newSub);
-                res.send(result);
-          
-            })
 
 
-    // //specific data read send to email
+        // data inserted from addBlogs
 
-    //   app.get('/wishlist/:id', async(req, res) =>{
-    //     const id= req.params.id;
-    //     const result = await blogsCollection.find({email:id}).toArray();
-    //     res.send(result);
-    // })
+        app.post('/addBlogs', async (req, res) => {
+            const newBlogs = req.body;
+            console.log(newBlogs);
+            const result = await blogsCollection.insertOne(newBlogs);
+            res.send(result);
+
+        })
 
 
-    // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
-  }
+        // subscriber data api
+
+        // data inserted from Subscriber-Blogs
+        app.post('/subscriber', async (req, res) => {
+            const newSub = req.body;
+            console.log(newSub);
+            const result = await subscriberCollection.insertOne(newSub);
+            res.send(result);
+
+        })
+        // data inserted for wishlist
+        app.post('/wishlist', async (req, res) => {
+            const newWish = req.body;
+            console.log(newWish);
+            const result = await wishlistCollection.insertOne(newWish);
+            res.send(result);
+
+        })
+
+        // data read from wishlist collection 
+        app.get('/wishlist', async (req, res) => {
+            const cursor =  wishlistCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+                 // data remove or delete operation
+                 app.delete('/wishlist/:id', async(req, res) =>{
+                    const id= req.params.id;
+                    const query= { _id: new ObjectId(id)}
+                    const result = await wishlistCollection.deleteOne(query);
+                    res.send(result);
+                })
+
+
+
+
+
+
+
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+        // await client.close();
+    }
 }
 run().catch(console.dir);
 

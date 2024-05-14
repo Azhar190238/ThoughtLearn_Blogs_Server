@@ -37,7 +37,21 @@ async function run() {
 
         const commentCollection = client.db('BlogsDB').collection('Comments');
 
-
+    // auth related JWT api 
+//     app.post('/jwt', async (req, res) => {
+//         const user = req.body;
+//         console.log(user);
+//         const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,
+//             { expiresIn: '1h' })
+//         res.send(token);
+//             // .cookie('token', token, {
+//             //     httpOnly: true,
+//             //     secure: process.env.NODE_ENV === 'production',
+//             //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+//             // })
+//             // .send({ success: true })
+// 8
+//     })
 
         // service related get all data operation api
 
@@ -64,6 +78,7 @@ async function run() {
             const updatedBlog = req.body;
             const blog = {
                 $set: {
+                    name: updatedBlog.name,
                     title: updatedBlog.title,
                     short_description: updatedBlog.short_description,
                     long_description: updatedBlog.long_description,
@@ -112,41 +127,62 @@ async function run() {
 
         })
 
-     //  All comment get api
+     //  All comment get api for specific blogId
 
      app.get('/comments', async (req, res) => {
         const cursor = commentCollection.find();
         const result = await cursor.toArray();
         res.send(result);
     })
+    app.get('/comments/:blogId', async (req, res) => {
+        const blogId_id = req.params.blogId;
+        const result = await commentCollection.find({ blogId: blogId_id }).toArray();
+        res.send(result);
+    })
 
-            // // Remove the _id field if it exists
-            // if (newWish.hasOwnProperty('_id')) {
-            //     delete newWish._id;
-            // }
+        
 
         // wishlist data insert 
-        app.post(`/wishlist/:id`, async (req, res) => {
+        app.post(`/wishlist`, async (req, res) => {
             const newWish = req.body;
             console.log(newWish);
-            const result =  await wishlistCollection.insertOne(newWish);
+        const  {_id, ...rest} = newWish
+            const result =  await wishlistCollection.insertOne({
+                blogId: _id, ...rest
+            });
+            res.send(result);
+        })
+  // all wishlist data
+        app.get('/wishlist', async (req, res) => {
+            const cursor = wishlistCollection.find();
+            const result = await cursor.toArray();
             res.send(result);
         })
 
 
-        //specific data read send to email
+       // specific data read send to email
 
-        app.get('/wishlist/:email', async (req, res) => {
-            const email_id = req.params.email;
-            const result = await wishlistCollection.find({ email: email_id }).toArray();
+        app.get('/wishlist/:userEmail', async (req, res) => {
+            
+            const email_id = req.params.userEmail;
+            console.log(email_id, 1)
+            const result = await wishlistCollection.find({ userEmail: email_id }).toArray();
             res.send(result);
         })
 
         // data remove or delete operation
         app.delete(`/wishlist/:id`, async (req, res) => {
             const id = req.params.id;
-            const query = { _id: id}
+            const query = { _id: new ObjectId (id) }
             const result = await wishlistCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // wishlist details
+        app.get('/wishlist/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: id }
+            const result = await wishlistCollection.findOne(query);
             res.send(result);
         })
 

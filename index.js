@@ -163,8 +163,9 @@ async function run() {
 
         })
 
-        // all subsriber getting
-
+        // all subscriber getting
+      
+        
         app.get('/subscriber', async(req,res)=>{
             const result = await subscriberCollection.find().toArray();
             res.send(result);

@@ -163,6 +163,13 @@ async function run() {
 
         })
 
+        // all subsriber getting
+
+        app.get('/subscriber', async(req,res)=>{
+            const result = await subscriberCollection.find().toArray();
+            res.send(result);
+        })
+
 
         // comment data api
         app.post('/comments', async (req, res) => {
